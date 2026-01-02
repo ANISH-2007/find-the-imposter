@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detective Chronicles: Find the Imposter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a1929 0%, #1a2b3c 50%, #2a3b4c 100%);
+            color: #e0f2ff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(0, 114, 255, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #89c2ff;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .game-mode {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 15px 30px;
+            background: rgba(0, 50, 100, 0.5);
+            border: 2px solid #004a99;
+            border-radius: 10px;
+            color: #a3d5ff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 180px;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-5px);
+            background: rgba(0, 80, 160, 0.6);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #004a99, #0072ff);
+            color: white;
+            border-color: #00c6ff;
+            box-shadow: 0 0 20px rgba(0, 198, 255, 0.5);
+        }
+
+        .mode-btn.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .mode-btn.locked::after {
+            content: "🔒";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .mode-name {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .mode-difficulty {
+            font-size: 0.9rem;
+            padding: 3px 10px;
+            border-radius: 15px;
+            margin-top: 5px;
+        }
+
+        .easy-diff {
+            background: rgba(0, 200, 100, 0.2);
+            color: #00c864;
+            border: 1px solid #00c864;
+        }
+
+        .medium-diff {
+            background: rgba(255, 165, 0, 0.2);
+            color: #ffa500;
+            border: 1px solid #ffa500;
+        }
+
+        .hard-diff {
+            background: rgba(255, 50, 50, 0.2);
+            color: #ff3232;
+            border: 1px solid #ff3232;
+        }
+
+        .game-area {
+            display: none;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .story-section {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(10, 30, 50, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #004a99;
+        }
+
+        .suspects-section {
+            flex: 2;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #00c6ff;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #0072ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .crime-details {
+            background: rgba(0, 40, 80, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .clues-list {
+            list-style-type: none;
+        }
+
+        .clues-list li {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: rgba(0, 114, 255, 0.1);
+            border-left: 4px solid #0072ff;
+            border-radius: 0 5px 5px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .clues-list li i {
+            color: #00c6ff;
+            margin-top: 3px;
+        }
+
+        .suspects-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .suspect-card {
+            background: rgba(20, 40, 60, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .suspect-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: #0072ff;
+        }
+
+        .suspect-card.active {
+            border-color: #00c6ff;
+            background: rgba(20, 60, 100, 0.9);
+            box-shadow: 0 0 20px rgba(0, 198, 255, 0.3);
+        }
+
+        .suspect-card.imposter {
+            border-color: #ff3232;
+        }
+
+        .suspect-name {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #00c6ff;
+        }
+
+        .suspect-role {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #004a99;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .suspect-story {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #b3d9ff;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .suspect-story::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .suspect-story::-webkit-scrollbar-thumb {
+            background: #0072ff;
+            border-radius: 10px;
+        }
+
+        .actions-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .accuse-btn {
+            background: linear-gradient(135deg, #ff3232, #cc0000);
+            color: white;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .accuse-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ff5252, #dd0000);
+            box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #666, #333);
+            color: white;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #777, #444);
+            box-shadow: 0 0 15px rgba(100, 100, 100, 0.5);
+        }
+
+        .hint-btn {
+            background: linear-gradient(135deg, #ffb347, #ffcc33);
+            color: #333;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .hint-btn:hover {
+            background: linear-gradient(135deg, #ffc367, #ffd64d);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #0a1a2a 0%, #1a2a3a 100%);
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+            border: 2px solid #0072ff;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #00c6ff;
+        }
+
+        .modal-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .solution-reveal {
+            background: rgba(0, 40, 80, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: rgba(0, 50, 100, 0.3);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 1px solid #004a99;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00c6ff;
+            margin-top: 5px;
+        }
+
+        .level-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .case-progress {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 40, 80, 0.7);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            border: 1px solid #0072ff;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .suspects-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-section {
+                flex-direction: column;
+            }
+            
+            button {
+                max-width: 100%;
+            }
+            
+            .game-mode {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .mode-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-detective"></i> Detective Chronicles</h1>
+            <div class="subtitle">Unlock mysteries by solving cases in order. Find the imposter in each case!</div>
+            
+            <div class="game-mode">
+                <div class="mode-btn active" id="level1-btn" data-level="0">
+                    <div class="mode-name">Case 1: The Novice Assignment</div>
+                    <div class="mode-difficulty easy-diff">BEGINNER LEVEL</div>
+                    <div class="mode-desc">Start your detective career</div>
+                </div>
+                
+                <div class="mode-btn locked" id="level2-btn" data-level="1">
+                    <div class="mode-name">Case 2: The Phantom Thief</div>
+                    <div class="mode-difficulty medium-diff">APPRENTICE LEVEL</div>
+                    <div class="mode-desc">Solve Case 1 to unlock</div>
+                </div>
+                
+                <div class="mode-btn locked" id="level3-btn" data-level="2">
+                    <div class="mode-name">Case 3: The Mastermind</div>
+                    <div class="mode-difficulty hard-diff">EXPERT LEVEL</div>
+                    <div class="mode-desc">Solve Case 2 to unlock</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="game-stats">
+            <div class="stat-box">
+                <div>Cases Solved</div>
+                <div class="stat-value" id="cases-solved">0</div>
+            </div>
+            <div class="stat-box">
+                <div>Accuracy</div>
+                <div class="stat-value" id="accuracy">0%</div>
+            </div>
+            <div class="stat-box">
+                <div>Current Level</div>
+                <div class="stat-value" id="current-level">Novice</div>
+            </div>
+        </div>
+        
+        <div class="case-progress" id="case-progress">Case 1: The Novice Assignment</div>
+        
+        <div class="game-area" id="game-area">
+            <div class="story-section">
+                <h2 class="section-title"><i class="fas fa-file-alt"></i> The Crime</h2>
+                <div class="crime-details">
+                    <p id="crime-description">Loading case details...</p>
+                    <p><strong>Time:</strong> <span id="crime-time">Unknown</span></p>
+                    <p><strong>Location:</strong> <span id="crime-location">Unknown</span></p>
+                </div>
+                
+                <h2 class="section-title"><i class="fas fa-search"></i> Key Evidence</h2>
+                <ul class="clues-list" id="clues-list">
+                    <!-- Clues will be added by JavaScript -->
+                </ul>
+            </div>
+            
+            <div class="suspects-section">
+                <h2 class="section-title"><i class="fas fa-users"></i> Persons of Interest</h2>
+                <div class="suspects-container" id="suspects-container">
+                    <!-- Suspect cards will be added by JavaScript -->
+                </div>
+                
+                <div class="actions-section">
+                    <button class="back-btn" id="back-btn">
+                        <i class="fas fa-arrow-left"></i> Back to Cases
+                    </button>
+                    <button class="hint-btn" id="hint-btn">
+                        <i class="fas fa-lightbulb"></i> Get Hint
+                    </button>
+                    <button class="accuse-btn" id="accuse-btn" disabled>
+                        <i class="fas fa-gavel"></i> Make Accusation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Result Modal -->
+    <div class="modal" id="result-modal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="modal-title">Case Solved!</h2>
+            <p class="modal-text" id="modal-text"></p>
+            <div class="solution-reveal" id="solution-reveal">
+                <!-- Solution details will be added by JavaScript -->
+            </div>
+            <button class="accuse-btn" id="continue-btn">
+                <i class="fas fa-forward"></i> Continue
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game Data - Level-locked cases with unique names
+        const gameData = [
+            {
+                caseNumber: 1,
+                levelName: "The Novice Assignment",
+                difficulty: "beginner",
+                difficultyClass: "easy-diff",
+                unlocked: true,
+                crimeDescription: "A valuable limited-edition comic book has been stolen from the university's pop culture club display. The comic, valued at $500, was taken during the club's weekly meeting.",
+                crimeTime: "Between 7:00 PM and 8:30 PM last Friday",
+                crimeLocation: "Student Union Building, Room 215",
+                clues: [
+                    "The display case was locked but the key was missing from the club president's desk",
+                    "A witness saw someone leaving the room in a hurry around 7:45 PM",
+                    "Only club members knew the comic was going to be displayed that day",
+                    "The security camera in the hallway was temporarily offline for maintenance",
+                    "A piece of fabric was found caught on the display case hinge"
+                ],
+                suspects: [
+                    {
+                        id: 1,
+                        name: "Alex Rivera",
+                        role: "Club President",
+                        story: "I was running the meeting from 6:30 PM until it ended at 8:00 PM. I never left the room. The key was in my desk drawer when I arrived. I have the receipt for the comic - why would I steal my own purchase?",
+                        isImposter: false,
+                        contradiction: "Claims the key was in his desk, but multiple members saw him retrieve it from his pocket during the meeting."
+                    },
+                    {
+                        id: 2,
+                        name: "Maya Chen",
+                        role: "Treasurer",
+                        story: "I was taking minutes during the meeting. I left briefly around 7:40 PM to use the restroom, but I was only gone for 5 minutes. I saw Jordan near the display case when I returned. I've been saving money to buy that comic myself.",
+                        isImposter: true,
+                        contradiction: "Claims to have seen Jordan near the display, but Jordan has an alibi witness for the entire meeting timeframe."
+                    },
+                    {
+                        id: 3,
+                        name: "Jordan Smith",
+                        role: "Events Coordinator",
+                        story: "I arrived late at 7:15 PM because I was finishing a lab report. I sat in the back and didn't move until the meeting ended. I collect vintage posters, not comics. Maya has been acting strange about money lately.",
+                        isImposter: false,
+                        contradiction: "Claims to have arrived at 7:15 PM, but two members recall him being present when the meeting started at 6:30 PM."
+                    },
+                    {
+                        id: 4,
+                        name: "Taylor Kim",
+                        role: "New Member",
+                        story: "This was my first meeting. I was introduced to everyone at the start. I don't know anything about comics. I left early at 7:30 PM because I had to meet my study group. Several people saw me leave.",
+                        isImposter: false,
+                        contradiction: "Claims not to know about comics, but was overheard discussing rare comic valuations with another member before the meeting."
+                    }
+                ],
+                solution: "MAYA CHEN is the imposter! As treasurer, she had access to the club's financial records and knew the comic's value. She needed money and planned to sell it online. Her claim of seeing Jordan near the display is contradicted by Jordan's solid alibi. The piece of fabric matches her distinctive jacket."
+            },
+            {
+                caseNumber: 2,
+                levelName: "The Phantom Thief",
+                difficulty: "apprentice",
+                difficultyClass: "medium-diff",
+                unlocked: false,
+                crimeDescription: "A prototype for a revolutionary smartphone charging technology has been stolen from the engineering lab. The device can charge a phone in 30 seconds and is worth millions in potential patents.",
+                crimeTime: "Sometime between 11:00 PM and 2:00 AM",
+                crimeLocation: "Advanced Engineering Lab, Tech Innovation Center",
+                clues: [
+                    "The lab's electronic lock was bypassed using a sophisticated device",
+                    "Security cameras captured a shadowy figure but no clear features",
+                    "The thief left a cryptic note: 'Technology belongs to the world'",
+                    "Only four people knew the prototype's exact location",
+                    "The lab's internal network was accessed remotely at 12:15 AM"
+                ],
+                suspects: [
+                    {
+                        id: 1,
+                        name: "Dr. Aris Thorne",
+                        role: "Lead Inventor",
+                        story: "I was at home with my family all night. My children had a school event earlier and we were exhausted. I have the most to lose - this is my life's work. The note suggests an ideological motive, not financial.",
+                        isImposter: false,
+                        contradiction: "Claims to have been home all night, but his keycard was used to disable the building's external alarms at 11:30 PM."
+                    },
+                    {
+                        id: 2,
+                        name: "Cassius Vance",
+                        role: "Security Consultant",
+                        story: "I designed the lab's security system. If I wanted to steal it, I would have done it months ago during installation. I was reviewing security footage at my office until 1:00 AM. The bypass method used is beyond my expertise.",
+                        isImposter: false,
+                        contradiction: "Claims the bypass is beyond his expertise, but he previously published a paper on exactly this type of security vulnerability."
+                    },
+                    {
+                        id: 3,
+                        name: "Lena Petrov",
+                        role: "Corporate Spy",
+                        story: "Yes, I represent a competitor. Yes, I tried to buy the technology. But theft? Too messy. I was at a hotel 20 miles away all night - you can check the cameras. The note sounds like something an activist would write.",
+                        isImposter: true,
+                        contradiction: "Her hotel alibi checks out, but cell tower data places her phone near the campus at the time of the theft."
+                    },
+                    {
+                        id: 4,
+                        name: "Kai Zhang",
+                        role: "Ethical Hacker",
+                        story: "I was hired to test the security. I found three vulnerabilities last month. If I wanted to steal it, I would have reported fewer issues. I believe in open-source technology, but not theft. I was streaming a hacking conference online all night.",
+                        isImposter: false,
+                        contradiction: "Claims to believe in open-source, but has previously criticized activists who 'steal in the name of ideology.'"
+                    }
+                ],
+                solution: "LENA PETROV is the imposter! She used a sophisticated signal repeater to make it appear she was at her hotel while actually being on campus. As a corporate spy, she staged the 'activist' note to misdirect the investigation. Her phone's cell tower data contradicts her alibi."
+            },
+            {
+                caseNumber: 3,
+                levelName: "The Mastermind",
+                difficulty: "expert",
+                difficultyClass: "hard-diff",
+                unlocked: false,
+                crimeDescription: "The Dean's personal diary, containing damaging information about faculty and potential evidence of academic misconduct, has been stolen. This could trigger multiple scandals and resignations across the university.",
+                crimeTime: "Between 5:00 PM and 7:00 PM on Thursday",
+                crimeLocation: "Dean's Office, Administration Building",
+                clues: [
+                    "The office was locked and showed no signs of forced entry",
+                    "The diary was kept in a hidden compartment behind a painting",
+                    "Only three people knew about the diary's existence",
+                    "Security logs show the door was unlocked at 5:45 PM",
+                    "A fingerprint was found on the painting frame but doesn't match any suspects"
+                ],
+                suspects: [
+                    {
+                        id: 1,
+                        name: "Dean Eleanor Vance",
+                        role: "University Dean",
+                        story: "I was in a budget meeting from 4:30 PM to 6:30 PM. The diary contains personal reflections, nothing damaging. I kept it hidden for privacy. Why would I steal my own diary? This must be a prank by disgruntled faculty.",
+                        isImposter: false,
+                        contradiction: "Claims the diary contains nothing damaging, but was overheard arguing with a trustee about 'compromising entries' just last week."
+                    },
+                    {
+                        id: 2,
+                        name: "Professor Marcus Reed",
+                        role: "Faculty Union Head",
+                        story: "I've been pushing for transparency in administration. Yes, I knew about the diary - Eleanor showed me once. I was grading papers in my office until 7:00 PM. My assistant can confirm. The diary could expose corruption, but I didn't take it.",
+                        isImposter: true,
+                        contradiction: "Claims his assistant can confirm his alibi, but the assistant left early at 4:00 PM that day due to a family emergency."
+                    },
+                    {
+                        id: 3,
+                        name: "Victoria Stone",
+                        role: "University Lawyer",
+                        story: "Eleanor told me about the diary when seeking legal advice. If it contained illegal activity, I would have advised its destruction. I was working from home after 4:00 PM. My home security system confirms I didn't leave. This theft benefits no one.",
+                        isImposter: false,
+                        contradiction: "Claims the diary should have been destroyed if illegal, but she advised Eleanor to keep it as 'leverage' in a recent email."
+                    },
+                    {
+                        id: 4,
+                        name: "Samuel Croft",
+                        role: "Head of Security",
+                        story: "I knew about the diary's location - Eleanor showed me after a previous break-in attempt. I was doing my rounds from 5:00 PM to 7:00 PM. My logs show I was in the north wing at the time. The fingerprint might be from maintenance staff.",
+                        isImposter: false,
+                        contradiction: "His security logs show gaps in the coverage during his rounds, and he accessed the administration building's security footage at 5:40 PM."
+                    }
+                ],
+                solution: "PROFESSOR MARCUS REED is the imposter! He used a duplicate key he had made when Eleanor once lent him her office key. He staged the theft to look like an outsider job, planning to leak select pages anonymously to force administrative changes. His alibi falls apart without his assistant's confirmation."
+            }
+        ];
+
+        // Game State
+        let currentCaseIndex = 0;
+        let selectedSuspect = null;
+        let solvedCases = 0;
+        let correctAccusations = 0;
+        let unlockedLevels = [0]; // Start with only level 1 unlocked
+
+        // DOM Elements
+        const gameArea = document.getElementById('game-area');
+        const crimeDescription = document.getElementById('crime-description');
+        const crimeTime = document.getElementById('crime-time');
+        const crimeLocation = document.getElementById('crime-location');
+        const cluesList = document.getElementById('clues-list');
+        const suspectsContainer = document.getElementById('suspects-container');
+        const casesSolved = document.getElementById('cases-solved');
+        const accuracy = document.getElementById('accuracy');
+        const currentLevel = document.getElementById('current-level');
+        const caseProgress = document.getElementById('case-progress');
+        const resultModal = document.getElementById('result-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalText = document.getElementById('modal-text');
+        const solutionReveal = document.getElementById('solution-reveal');
+        const hintBtn = document.getElementById('hint-btn');
+        const accuseBtn = document.getElementById('accuse-btn');
+        const backBtn = document.getElementById('back-btn');
+        const continueBtn = document.getElementById('continue-btn');
+        const level1Btn = document.getElementById('level1-btn');
+        const level2Btn = document.getElementById('level2-btn');
+        const level3Btn = document.getElementById('level3-btn');
+
+        // Initialize the game
+        function initGame() {
+            updateLevelButtons();
+            updateStats();
+            
+            // Event listeners for level buttons
+            level1Btn.addEventListener('click', () => startLevel(0));
+            level2Btn.addEventListener('click', () => startLevel(1));
+            level3Btn.addEventListener('click', () => startLevel(2));
+            
+            // Event listeners for game buttons
+            backBtn.addEventListener('click', showLevelSelect);
+            hintBtn.addEventListener('click', showHint);
+            accuseBtn.addEventListener('click', makeAccusation);
+            continueBtn.addEventListener('click', handleContinue);
+            
+            // Start with level 1
+            startLevel(0);
+        }
+
+        // Start a specific level
+        function startLevel(levelIndex) {
+            if (!unlockedLevels.includes(levelIndex)) {
+                alert(`Complete ${gameData[levelIndex-1].levelName} first to unlock this case!`);
+                return;
+            }
+            
+            currentCaseIndex = levelIndex;
+            const caseData = gameData[levelIndex];
+            
+            // Update UI
+            gameArea.style.display = 'flex';
+            caseProgress.style.display = 'block';
+            caseProgress.textContent = `Current Case: ${caseData.levelName}`;
+            currentLevel.textContent = caseData.difficulty.charAt(0).toUpperCase() + caseData.difficulty.slice(1);
+            
+            // Load case data
+            loadCase(caseData);
+            
+            // Update active level button
+            updateLevelButtons();
+        }
+
+        // Load case data into UI
+        function loadCase(caseData) {
+            // Reset selection
+            selectedSuspect = null;
+            accuseBtn.disabled = true;
+            
+            // Update crime info
+            crimeDescription.textContent = caseData.crimeDescription;
+            crimeTime.textContent = caseData.crimeTime;
+            crimeLocation.textContent = caseData.crimeLocation;
+            
+            // Update clues
+            cluesList.innerHTML = '';
+            caseData.clues.forEach(clue => {
+                const li = document.createElement('li');
+                li.innerHTML = `<i class="fas fa-fingerprint"></i> <span>${clue}</span>`;
+                cluesList.appendChild(li);
+            });
+            
+            // Update suspects
+            suspectsContainer.innerHTML = '';
+            caseData.suspects.forEach(suspect => {
+                const card = document.createElement('div');
+                card.className = 'suspect-card';
+                if (suspect.isImposter) {
+                    card.classList.add('imposter');
+                }
+                
+                card.innerHTML = `
+                    <div class="level-badge ${caseData.difficultyClass}">${caseData.difficulty.toUpperCase()}</div>
+                    <h3 class="suspect-name">${suspect.name}</h3>
+                    <div class="suspect-role">${suspect.role}</div>
+                    <p class="suspect-story">${suspect.story}</p>
+                `;
+                
+                card.addEventListener('click', () => selectSuspect(suspect.id, card));
+                suspectsContainer.appendChild(card);
+            });
+        }
+
+        // Select a suspect
+        function selectSuspect(suspectId, cardElement) {
+            // Remove active class from all cards
+            document.querySelectorAll('.suspect-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Add active class to selected card
+            cardElement.classList.add('active');
+            
+            // Set selected suspect
+            selectedSuspect = suspectId;
+            accuseBtn.disabled = false;
+        }
+
+        // Make an accusation
+        function makeAccusation() {
+            if (selectedSuspect === null) return;
+            
+            const caseData = gameData[currentCaseIndex];
+            const suspect = caseData.suspects.find(s => s.id === selectedSuspect);
+            const isCorrect = suspect.isImposter;
+            
+            // Update game stats
+            solvedCases++;
+            if (isCorrect) {
+                correctAccusations++;
+                
+                // Unlock next level if available
+                if (currentCaseIndex < gameData.length - 1 && !unlockedLevels.includes(currentCaseIndex + 1)) {
+                    unlockedLevels.push(currentCaseIndex + 1);
+                    gameData[currentCaseIndex + 1].unlocked = true;
+                    updateLevelButtons();
+                }
+            }
+            
+            // Show result modal
+            if (isCorrect) {
+                modalTitle.innerHTML = '<i class="fas fa-trophy"></i> Case Solved!';
+                modalText.innerHTML = `Excellent work, detective! You've successfully identified <strong>${suspect.name}</strong> as the imposter in "${caseData.levelName}".`;
+                
+                // Special message for final case
+                if (currentCaseIndex === gameData.length - 1) {
+                    modalText.innerHTML += `<br><br>You've solved all cases and earned the title of <strong>Master Detective</strong>!`;
+                }
+            } else {
+                const imposter = caseData.suspects.find(s => s.isImposter);
+                modalTitle.innerHTML = '<i class="fas fa-times-circle"></i> Wrong Accusation';
+                modalText.innerHTML = `Unfortunately, ${suspect.name} is not the imposter. The real culprit was <strong>${imposter.name}</strong>.`;
+            }
+            
+            // Show solution
+            solutionReveal.innerHTML = `
+                <h3><i class="fas fa-lightbulb"></i> Case Solution</h3>
+                <p>${caseData.solution}</p>
+                <h3><i class="fas fa-exclamation-circle"></i> Key Contradiction:</h3>
+                <p>${suspect.contradiction}</p>
+            `;
+            
+            // Reveal all imposters in the UI
+            document.querySelectorAll('.suspect-card').forEach(card => {
+                const cardSuspectName = card.querySelector('.suspect-name').textContent;
+                const isImposter = caseData.suspects.find(s => s.name === cardSuspectName && s.isImposter);
+                if (isImposter) {
+                    card.classList.add('imposter');
+                }
+            });
+            
+            // Update continue button text
+            if (currentCaseIndex < gameData.length - 1 && unlockedLevels.includes(currentCaseIndex + 1)) {
+                continueBtn.innerHTML = '<i class="fas fa-forward"></i> Next Case';
+            } else if (currentCaseIndex === gameData.length - 1) {
+                continueBtn.innerHTML = '<i class="fas fa-award"></i> View Score';
+            } else {
+                continueBtn.innerHTML = '<i class="fas fa-redo"></i> Retry Case';
+            }
+            
+            // Show modal
+            resultModal.style.display = 'flex';
+            
+            // Update stats
+            updateStats();
+        }
+
+        // Show a hint
+        function showHint() {
+            const caseData = gameData[currentCaseIndex];
+            const hints = [
+                `Pay close attention to timeline inconsistencies.`,
+                `Look for statements that contradict the evidence.`,
+                `Consider who had both motive and opportunity.`,
+                `Check alibis against the known facts.`,
+                `Sometimes the person with the strongest reaction is hiding something.`
+            ];
+            
+            alert(`🔍 DETECTIVE'S HINT: ${hints[Math.floor(Math.random() * hints.length)]}`);
+        }
+
+        // Handle continue button
+        function handleContinue() {
+            resultModal.style.display = 'none';
+            
+            if (currentCaseIndex < gameData.length - 1 && unlockedLevels.includes(currentCaseIndex + 1)) {
+                // Go to next case
+                startLevel(currentCaseIndex + 1);
+            } else {
+                // Stay on current case or show level select
+                showLevelSelect();
+            }
+        }
+
+        // Show level selection screen
+        function showLevelSelect() {
+            gameArea.style.display = 'none';
+            caseProgress.style.display = 'none';
+            updateLevelButtons();
+        }
+
+        // Update level buttons based on unlocked levels
+        function updateLevelButtons() {
+            // Update all level buttons
+            gameData.forEach((level, index) => {
+                const btn = document.getElementById(`level${index+1}-btn`);
+                
+                if (unlockedLevels.includes(index)) {
+                    btn.classList.remove('locked');
+                    btn.classList.add('active');
+                    const desc = btn.querySelector('.mode-desc');
+                    if (desc) desc.textContent = "Click to play";
+                } else {
+                    btn.classList.add('locked');
+                    btn.classList.remove('active');
+                    const desc = btn.querySelector('.mode-desc');
+                    if (desc) {
+                        if (index > 0) {
+                            desc.textContent = `Solve ${gameData[index-1].levelName} to unlock`;
+                        } else {
+                            desc.textContent = "Locked";
+                        }
+                    }
+                }
+                
+                // Remove active class from all buttons first
+                btn.classList.remove('active');
+            });
+            
+            // Set current level button as active
+            const currentBtn = document.getElementById(`level${currentCaseIndex+1}-btn`);
+            if (currentBtn && unlockedLevels.includes(currentCaseIndex)) {
+                currentBtn.classList.add('active');
+            }
+        }
+
+        // Update game statistics
+        function updateStats() {
+            casesSolved.textContent = solvedCases;
+            
+            const acc = solvedCases > 0 ? Math.round((correctAccusations / solvedCases) * 100) : 0;
+            accuracy.textContent = `${acc}%`;
+        }
+
+        // Initialize the game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
